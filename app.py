@@ -1,13 +1,31 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+# app.py
+
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import CSRFProtect  # Import CSRFProtect
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField
+from wtforms.validators import DataRequired
+from werkzeug.utils import secure_filename
+from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
-import datetime
+from datetime import datetime
+from flask_bcrypt import Bcrypt
+from flask import jsonify
+from flask_migrate import Migrate
 
 
+db = SQLAlchemy()
+login_manager = LoginManager()
+bcrypt = Bcrypt()
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
-    # db.init_app(app)
+    db.init_app(app)
     app.config["IMAGE_FOLDER"] = "static/images/"
+    migrate = Migrate(app, db)
+    from models.models import Product, Category
 
     
     @app.route('/')
@@ -32,13 +50,16 @@ def create_app():
     def contact():
         return render_template('contact.html')
 
-    @app.route('/portfolio')
-    def portfolio():
-        return render_template('portfolio.html')
+    @app.route('/shop')
+    def shop():
+        products = Product.query.all()
+        products_with_categories = Product.query.join(Category).all()
+        print(products)
+        return render_template('shop.html', products_with_categories=products_with_categories)
 
-    @app.route('/portfolio-details')
-    def portfolio_details():
-        return render_template('portfolio-details.html')
+    @app.route('/shop-details')
+    def shop_details():
+        return render_template('shop-details.html')
 
     @app.route('/services')
     def services():
