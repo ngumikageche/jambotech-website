@@ -14,6 +14,7 @@ from datetime import datetime
 from flask_bcrypt import Bcrypt
 from flask import jsonify
 from flask_migrate import Migrate
+import requests
 
 
 db = SQLAlchemy()
@@ -49,13 +50,39 @@ def create_app():
     @app.route('/contact')
     def contact():
         return render_template('contact.html')
-
+    
     @app.route('/shop')
     def shop():
-        products = Product.query.all()
-        products_with_categories = Product.query.join(Category).all()
-        print(products)
-        return render_template('shop.html', products_with_categories=products_with_categories)
+        import requests
+        
+        # Fetch categories from the API
+        category_response = requests.get('http://127.0.0.1:5001/categories')
+        if category_response.status_code == 200:
+            categories = category_response.json()
+        else:
+            categories = []
+
+        # Fetch products from the API
+        product_response = requests.get('http://127.0.0.1:5001/products')
+        if product_response.status_code == 200:
+            products = product_response.json()
+        else:
+            products = []
+
+        # Merge products with their respective categories
+        products_with_categories = []
+        for product in products:
+            category = next((cat for cat in categories if 'id' in cat and 'category_id' in product and int(cat['id']) == int(product['category_id'])), None)
+            if category:
+                products_with_categories.append({
+                    'name': product['name'],
+                    'description': product['description'],
+                    'price': product['price'],
+                    'category': category,
+                    'image': product.get('image', 'default.jpg')
+                })
+
+        return render_template('shop.html', categories=categories, products=products, products_with_categories=products_with_categories)
 
     @app.route('/shop-details')
     def shop_details():
@@ -80,4 +107,4 @@ if __name__ == '__main__':
     app = create_app()
     # with app.app_context():
     #     db.create_all()
-    app.run(port="5001", debug="true")
+    app.run(port="5000", debug="true")

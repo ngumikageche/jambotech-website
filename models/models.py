@@ -1,7 +1,10 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import relationship, backref
 from app import db
+
 from datetime import datetime
+
+
 # User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -83,17 +86,18 @@ class Product(db.Model):
     tags = db.relationship('Tag', secondary=product_tags, lazy='subquery',
                            backref=db.backref('products', lazy=True))
     orders = db.relationship('Order', backref='product', lazy=True)
-
+    image = db.Column(db.String(255))
+   
     def __repr__(self):
         return f'<Product {self.name}>'
 
-# Order model
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     ordered_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), nullable=False, default='pending')  # Add status attribute with a default value
 
     def __repr__(self):
         return f'<Order {self.id}>'
