@@ -19,49 +19,32 @@
     <!-- ======= Portfolio Section ======= -->
     <section id="portfolio" class="portfolio">
       <div class="container" data-aos="fade-up">
-
+        <p>{{ message }}</p>
         <div class="portfolio-isotope" data-portfolio-filter="*" data-portfolio-layout="masonry" data-portfolio-sort="original-order">
-          {% for product in products_with_categories %}
-        <div class="product">
-            <h2>{{ product.name }}</h2>
-            <p>Description: {{ product.description }}</p>
-            <p>Price: ${{ product.price }}</p>
-            <p>Category: {{ product.category.name }}</p>
-            <!-- Add more product details as needed -->
-        </div>
-        {% endfor %}
           <ul class="portfolio-flters" data-aos="fade-up" data-aos-delay="100">
             {% for category in categories %}
-            <li data-filter="*" value="{{ category.id }}" class="filter-active">{{ category.name }}</li>
+            <li data-filter="{{ category.id }}" value="{{ category.id }}" class="filter-active">{{ category.name }}</li>
             <!-- <li data-filter=".filter-app">App</li>
             <li data-filter=".filter-product">Product</li>
             <li data-filter=".filter-branding">Branding</li>
             <li data-filter=".filter-books">Books</li> -->
             {% endfor %}
           </ul><!-- End Portfolio Filters -->
-
-
-          <div class="container2 mt-4 col">
-            <div class="search-container">
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control search-input d-none" id="searchInput" placeholder="Search..." onkeydown="handleSearchInput(event)">
-                    <div class="input-group-append">
-                        <button class="btn btn-light1 search-button-icon " id="mobileSearchButton" onclick="searchProducts()">Search here</button>
-                        <button class="btn btn-light1 search-button-icon " id="mobileSearchIcon" onclick="searchProducts()">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+       <!-- Products Grid -->
+       <div class="row gy-4 portfolio-container" data-aos="fade-up" data-aos-delay="300">
+        {% for product in products_with_categories %}
+            <div class="col-lg-4 col-md-6 portfolio-item {{ product.category.id }}">
+                <img src="static/img/portfolio/app-1.jpg" class="img-fluid" alt="">
+                <div class="portfolio-info">
+                    <h4>Name: {{ product.name }}</h4>
+                    <p>Description: {{ product.description }}</p>
+                    <p>Category: {{ product.category.name}}</p>
+                    <a href="static/img/portfolio/app-1.jpg" title="{{ product.name }}" data-gallery="portfolio-gallery-{{ product.category.id }}" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+                    <a href="{{url_for('shop_details')}}" title="More Details" class="details-link"><i class="bi bi-link-45deg"></i></a>
                 </div>
             </div>
-            <div id="productContainer" class="row mt-4">
-                <!-- Product cards will be dynamically added here -->
-            </div>
-        
-          <!--  <nav aria-label="Page navigation">
-                <ul id="pagination-container" class="pagination justify-content-center mt-4">
-                </ul>
-	  </nav>-->
-        </div>
+        {% endfor %}
+    </div><!-- End Portfolio Container -->
 
         </div>
 

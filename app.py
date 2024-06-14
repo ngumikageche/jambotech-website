@@ -15,6 +15,7 @@ from flask_bcrypt import Bcrypt
 from flask import jsonify
 from flask_migrate import Migrate
 import requests
+import os
 
 
 db = SQLAlchemy()
@@ -23,6 +24,8 @@ bcrypt = Bcrypt()
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
+    
+    # Configure the generative AI library with your API key
     db.init_app(app)
     app.config["IMAGE_FOLDER"] = "static/images/"
     migrate = Migrate(app, db)
@@ -38,6 +41,7 @@ def create_app():
     @app.route('/about')
     def about():
         return render_template('about.html')
+        
 
     @app.route('/blog')
     def blog():
@@ -51,25 +55,30 @@ def create_app():
     def contact():
         return render_template('contact.html')
     
+   
+
     @app.route('/shop')
     def shop():
-        import requests
-        
-        # Fetch categories from the API
-        category_response = requests.get('http://127.0.0.1:5001/categories')
-        if category_response.status_code == 200:
+        try:
+            # Fetch categories from the API
+            category_response = requests.get('http://127.0.0.1:5001/categories')
+            category_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
             categories = category_response.json()
-        else:
+        except requests.exceptions.RequestException as e:
             categories = []
+            print(f"Error fetching categories: {e}")
+            return render_template('shop.html', message="Error fetching categories")
 
-        # Fetch products from the API
-        product_response = requests.get('http://127.0.0.1:5001/products')
-        if product_response.status_code == 200:
-            products = product_response.json()
-        else:
+        try:
+            # Fetch products from the API
+            product_response = requests.get('http://127.0.0.1:5001/products')
+            product_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+            products = product_response.json().get("products", [])
+        except requests.exceptions.RequestException as e:
             products = []
+            print(f"Error fetching products: {e}")
+            return render_template('shop.html', message="Error fetching products")
 
-        # Merge products with their respective categories
         products_with_categories = []
         for product in products:
             category = next((cat for cat in categories if 'id' in cat and 'category_id' in product and int(cat['id']) == int(product['category_id'])), None)
@@ -83,6 +92,7 @@ def create_app():
                 })
 
         return render_template('shop.html', categories=categories, products=products, products_with_categories=products_with_categories)
+
 
     @app.route('/shop-details')
     def shop_details():

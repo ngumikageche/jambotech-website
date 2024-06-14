@@ -20,25 +20,25 @@ function toggleTextVisibility() {
 var currentPage = 1;
 var totalPages = 3; // Replace with the actual total number of pages
 
- // Set a debounce delay (in milliseconds)
- const debounceDelay = 300; // Adjust as needed
+// Set a debounce delay (in milliseconds)
+const debounceDelay = 300; // Adjust as needed
 
- let debounceTimer;
+let debounceTimer;
 
- // Attach input event listener to the search input
- $('#searchInput').on('input', function () {
-     clearTimeout(debounceTimer);
+// Attach input event listener to the search input
+$('#searchInput').on('input', function () {
+    clearTimeout(debounceTimer);
 
-     // Set a new timer to trigger search after the debounce delay
-     debounceTimer = setTimeout(function () {
-         // Execute search function
-         searchProducts();
-     }, debounceDelay);
- });
+    // Set a new timer to trigger search after the debounce delay
+    debounceTimer = setTimeout(function () {
+        // Execute search function
+        searchProducts();
+    }, debounceDelay);
+});
 
 function searchProducts() {
     var searchQuery = $('#searchInput').val();
-    
+
     if (searchQuery.trim() === "") {
         // If the search query is empty, you can handle this case as needed
         // For example, you might want to display a message or take other actions
@@ -50,54 +50,56 @@ function searchProducts() {
     getProductSearch(searchQuery);
 }
 
-    // Add this script in your HTML or JS file
-    $(document).ready(function () {
-        $('.category_id-button').on('click', function () {
-            // Remove 'active' class from all buttons
-            $('.category_id-button').removeClass('active');
-    
-            // Add 'active' class to the clicked button
-            $(this).addClass('active');
-    
-            // Retrieve the selected category_id
-            var selectedCategory = $(this).data('category_id.id');
-    
-            // Call a function or perform actions based on the selected category_id
-            // For example, you might want to load products for the selected category_id
-            if (selectedCategory === 'all') {
-                // Handle 'All' category_id separately
-                showLoadingSpinner();
-                getAllProducts();
-            } else {
-                showLoadingSpinner();
-                getProducts(selectedCategory);
-                
-            }
-        });
+// Add this script in your HTML or JS file
+$(document).ready(function () {
+    $('.category_id-button').on('click', function () {
+        // Remove 'active' class from all buttons
+        $('.category_id-button').removeClass('active');
+
+        // Add 'active' class to the clicked button
+        $(this).addClass('active');
+
+        // Retrieve the selected category_id
+        var selectedCategory = $(this).data('category_id.id');
+
+        // Call a function or perform actions based on the selected category_id
+        // For example, you might want to load products for the selected category_id
+        if (selectedCategory === 'all') {
+            // Handle 'All' category_id separately
+            showLoadingSpinner();
+            getAllProducts();
+        } else {
+            showLoadingSpinner();
+            getProducts(selectedCategory);
+
+        }
     });
-    function getAllProducts() {
-        // Fetch all products for the next page
-        currentPage++;
-        // Fetch all products for the next page
-        $.get('127.0.0.1:5001/products', { page: currentPage }, function (data) {
-            if (data && data.current_page !== undefined) {
-                // Valid response structure
-                currentPage = data.current_page;
-                
-                displayProducts(data.products, currentPage, data.total_pages, 'All');
-                generatePaginationLinks2(currentPage, data.total_pages, 'All');
-            } else {
-                console.log('Invalid response structure:', data);
-                // Handle invalid response structure, e.g., display a message to the user
-                $('#productContainer').html('<div class="alert alert-danger" role="alert">Invalid response structure. Please try again.</div>');
-            }
-        })
+});
+function getAllProducts() {
+    // Fetch all products for the next page
+    currentPage++;
+    // Fetch all products for the next page
+    $.get('127.0.0.1:5001/products', { page: currentPage }, function (data) {
+        if (data && data.current_page !== undefined) {
+            // Valid response structure
+            currentPage = data.current_page;
+            console.log(currentpage)
+
+            displayProducts(data.products, currentPage, data.total_pages, 'All');
+            generatePaginationLinks2(currentPage, data.total_pages, 'All');
+        } else {
+            console.log('Invalid response structure:', data);
+            // Handle invalid response structure, e.g., display a message to the user
+            $('#productContainer').html('<div class="alert alert-danger" role="alert">Invalid response structure. Please try again.</div>');
+        }
+    })
         .fail(function () {
             console.log('Error fetching products.');
             // Handle AJAX request failure (e.g., network error)
             $('#productContainer').html('<div class="alert alert-danger" role="alert">Error fetching products. Please try again.</div>');
         });
-    }
+}
+getAllProducts()
 
 function showLoadingSpinner() {
     getAllProducts
@@ -128,10 +130,10 @@ function getProductSearch(name, page) {
         displayProducts(data.products, currentPage, data.total_pages, '');
         generatePaginationLinks(currentPage, data.total_pages, '');
     })
-    .fail(function () {
-        // Handle AJAX request failure (e.g., network error)
-        $('#productContainer').html('<div class="alert alert-danger" role="alert">Error fetching products. Please try again.</div>');
-    });
+        .fail(function () {
+            // Handle AJAX request failure (e.g., network error)
+            $('#productContainer').html('<div class="alert alert-danger" role="alert">Error fetching products. Please try again.</div>');
+        });
 }
 
 function getProducts(category_id, page, search) {
@@ -142,15 +144,15 @@ function getProducts(category_id, page, search) {
         requestData.search = search;
     }
 
-    $.get(`http://127.0.0.1:5001/products/${category_id}`, requestData, function (data) {
+    $.get(`http://127.0.0.1:5001/products/`, requestData, function (data) {
         currentPage = data.current_page;
         displayProducts(data.products, currentPage, data.total_pages, category_id);
         generatePaginationLinks(currentPage, data.total_pages, category_id);
     })
-    .fail(function () {
-        // Handle AJAX request failure (e.g., network error)
-        $('#productContainer').html('<div class="alert alert-danger" role="alert">Error fetching products. Please try again.</div>');
-    });
+        .fail(function () {
+            // Handle AJAX request failure (e.g., network error)
+            $('#productContainer').html('<div class="alert alert-danger" role="alert">Error fetching products. Please try again.</div>');
+        });
 }
 
 
@@ -285,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const items = document.querySelectorAll('.item');
 
 items.forEach(item => {
-    
+
     item.addEventListener('click', () => {
         // Remove background color from all items
         items.forEach(otherItem => {
@@ -301,7 +303,7 @@ items.forEach(item => {
         // item.style.borderColor =  '#141951';
         item.style.borderBottomWidth = '5px';
         item.style.borderTopWidth = '';
-        
+
     });
 });
 
